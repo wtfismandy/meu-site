@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mensagens</title>
+</head>
+<body>
+  <h1>Enviar Mensagem</h1>
+  <input type="text" id="texto" placeholder="Digite uma mensagem" />
+  <button onclick="enviar()">Enviar</button>
+
+  <h2>Mensagens:</h2>
+  <ul id="lista"></ul>
+
+  <script>
+    const api = ' https://meusite-backend.onrender.com&#39;;
+
+    async function carregar() {
+      const res = await fetch(api + '/dados');
+      const dados = await res.json();
+      const lista = document.getElementById('lista');
+      lista.innerHTML = '';
+      dados.forEach(m => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          ${m.texto}
+          <button onclick="deletar(${m.id})">🗑️</button>
+        `;
+        lista.appendChild(li);
+      });
+    }
+
+    async function enviar() {
+      const texto = document.getElementById('texto').value;
+      if (!texto) return;
+      await fetch(api + '/dados', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ texto })
+      });
+      document.getElementById('texto').value = '';
+      carregar();
+    }
+
+    async function deletar(id) {
+      if (!confirm('Tem certeza que deseja apagar essa mensagem?')) return;
+      await fetch(api + '/dados/' + id, {
+        method: 'DELETE'
+      });
+      carregar();
+    }
+
+    carregar();
+  </script>
+</body>
+</html>
